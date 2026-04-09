@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, ScrollView, Text, View } from 'react-native';
+import BarraBusquedaMovil from '../components/BarraBusquedaMovil';
 import { CardProduct } from '../components/CardProduct';
 import Carrusel from '../components/Carrusel';
 import CustomButton from '../components/CustomButton';
@@ -41,7 +42,7 @@ const App = () => {
 
       {/* 1. HEADER */}
       <View className="mb-4">
-        <View className="border-t border-b border-gray-200">
+        <View className="shadow-md">
           <Header />
         </View>
       </View>
@@ -68,6 +69,11 @@ const App = () => {
       <View className="mb-8 px-4">
         <CustomButton children="Botón Primario" color="primary" className='w-full mb-3' />
         <CustomButton children="Botón Secundario" color="secondary" className='w-full' />
+      </View>
+
+      {/* BARRA DE BUSQUEDA MOVIL */}
+      <View className="mb-8 px-4">
+        <BarraBusquedaMovil />
       </View>
 
       {/* 3. CARD PRODUCT */}
