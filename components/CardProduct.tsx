@@ -27,7 +27,7 @@ export const CardProduct = ({ producto }: { producto: any }) => {
                 <Text className="text-base font-bold text-gray-800 mb-2">
                     ${new Intl.NumberFormat("es-CO").format(precio)}
                 </Text>
-                <CustomButton className="w-full">Comprar</CustomButton>
+                <CustomButton className="w-auto">Comprar</CustomButton>
             </View>
 
         </View>

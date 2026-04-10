@@ -1,9 +1,8 @@
+import CustomButton from '@/components/CustomButton';
 import React from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
-import BarraBusquedaMovil from '../components/BarraBusquedaMovil';
-import { CardProduct } from '../components/CardProduct';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Carrusel from '../components/Carrusel';
-import CustomButton from '../components/CustomButton';
 import FlutterComponent from '../components/Flutter';
 import Header from '../components/header';
 
@@ -28,6 +27,51 @@ const App = () => {
       descripcion: "Diseño minimalista ideal para el uso diario.",
       precio: 35000,
       imagen: "https://images.unsplash.com/photo-1573408301145-b98c46544405?q=80&w=1169&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Clásica",
+      descripcion: "Diseño minimalista ideal para el uso diario.",
+      precio: 35000,
+      imagen: "https://images.unsplash.com/photo-1573408301145-b98c46544405?q=80&w=1169&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Piedra Volcánica",
+      descripcion: "Pulsera elaborada con piedras volcanicas y dijes de acero inoxidable.",
+      precio: 45000,
+      imagen: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1170&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Premium",
+      descripcion: "Elegante pulsera con acabados premium para cualquier ocasión.",
+      precio: 55000,
+      imagen: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=1170&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Clásica",
+      descripcion: "Diseño minimalista ideal para el uso diario.",
+      precio: 35000,
+      imagen: "https://images.unsplash.com/photo-1573408301145-b98c46544405?q=80&w=1169&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Clásica",
+      descripcion: "Diseño minimalista ideal para el uso diario.",
+      precio: 35000,
+      imagen: "https://images.unsplash.com/photo-1573408301145-b98c46544405?q=80&w=1169&auto=format&fit=crop"
+    }
+  ];
+
+  const sampleProducts2 = [
+    {
+      nombre: "Pulsera Piedra Volcánica",
+      descripcion: "Pulsera elaborada con piedras volcanicas y dijes de acero inoxidable.",
+      precio: 45000,
+      imagen: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1170&auto=format&fit=crop"
+    },
+    {
+      nombre: "Pulsera Premium",
+      descripcion: "Elegante pulsera con acabados premium para cualquier ocasión.",
+      precio: 55000,
+      imagen: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=1170&auto=format&fit=crop"
     }
   ];
 
@@ -38,56 +82,55 @@ const App = () => {
   ];
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: 'white' }}>
-
-      {/* 1. HEADER */}
-      <View className="mb-4">
-        <View className="shadow-md">
-          <Header />
+    <SafeAreaView className='flex-1 bg-white'>
+      <ScrollView className='flex-1 bg-white'>
+        {/* 1. HEADER */}
+        <View>
+          <View>
+            <Header />
+          </View>
         </View>
-      </View>
 
-      {/* BANNER PROMOCIONAL (Carrusel Automático) */}
-      <View className="mb-8">
-        <Text className="text-gray-500 font-bold px-4 mb-3 text-xs uppercase tracking-widest">Ofertas y Promociones</Text>
-        <Carrusel
-          data={promoBanners}
-          renderItem={(item) => (
-            // 👇 AQUÍ PUEDES MODIFICAR LA ALTURA DEL CARRUSEL (ejemplos: h-48, h-64, h-72, h-80) 👇
-            <View className="w-full h-80 px-4">
-              <Image
-                source={{ uri: item.imagen }}
-                className="w-full h-full rounded-2xl"
-                resizeMode="cover"
-              />
-            </View>
-          )}
-        />
-      </View>
-
-      {/* 2. CUSTOM BUTTON */}
-      <View className="mb-8 px-4">
-        <CustomButton children="Botón Primario" color="primary" className='w-full mb-3' />
-        <CustomButton children="Botón Secundario" color="secondary" className='w-full' />
-      </View>
-
-      {/* BARRA DE BUSQUEDA MOVIL */}
-      <View className="mb-8 px-4">
-        <BarraBusquedaMovil />
-      </View>
-
-      {/* 3. CARD PRODUCT */}
-      <View className="mb-8 px-4">
-        <View className="items-center">
-          <CardProduct producto={sampleProducts[0]} />
+        {/* BANNER PROMOCIONAL (Carrusel Automático) */}
+        <View>
+          <Carrusel
+            type="images"
+            images={promoBanners.map(b => b.imagen)}
+            showDots={true}
+            autoPlay={true}
+          />
         </View>
-      </View>
 
-      {/* 5. PIE DE PÁGINA (FooterComponent importado desde Flutter.tsx) 
-          Al estar fuera del View con flex-1, siempre se anclará al fondo */}
-      <FlutterComponent />
+        {/* 3. PRODUCTOS RECOMENDADOS (USANDO CARRUSEL) */}
+        <View className="items-center px-4 py-10">
+          <Text className="text-gray-500 font-bold px-4 mb-3 text-xl uppercase tracking-widest">Artesanías Destacadas</Text>
+        </View>
+        <View className="mb-8 mx-80 px-8 py-10">
+          <Carrusel
+            type="products"
+            products={sampleProducts}
+            onProductPress={(item) => console.log('Producto seleccionado:', item.nombre)}
+          />
+        </View>
 
-    </ScrollView>
+        {/* 3. PRODUCTOS RECOMENDADOS SEGUNDA PARTE (USANDO CARRUSEL) */}
+        <View className="mb-20 mx-80 px-8 flex flex-row">
+          <Carrusel
+            type="products"
+            products={sampleProducts2}
+            onProductPress={(item) => console.log('Producto seleccionado:', item.nombre)}
+          />
+          <View className='bg-quaternary-950 w-full'>
+            <Text className='text-quaternary-500 text-3xl ml-10 mt-10'>Piedras</Text>
+            <Text className='text-quaternary-500 text-5xl ml-10'>Volcanicas</Text>
+            <CustomButton children='Ver mas' className='w-60 ml-10 mt-3' />
+          </View>
+        </View>
+
+        {/* 5. PIE DE PÁGINA */}
+        <FlutterComponent />
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 

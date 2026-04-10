@@ -26,14 +26,14 @@ const CustomButton = ({ children, color = 'primary', variant, onPress, onLongPre
 
     if (variant === 'text-only') {
         return (
-            <Pressable className={`p-3 ${className}`} onPress={onPress} onLongPress={onLongPress}>
+            <Pressable className={`p-1 ${className}`} onPress={onPress} onLongPress={onLongPress}>
                 <Text className={`${btnTextColor} text-center`}>{children}</Text>
             </Pressable>
         )
     }
 
     return (
-        <Pressable className={`p-3 rounded-md ${btnColor} ${className}`} onPress={onPress} onLongPress={onLongPress}>
+        <Pressable className={`p-1 rounded-md ${btnColor} ${className}`} onPress={onPress} onLongPress={onLongPress}>
             <Text className='text-quaternary-950 text-center'>{children}</Text>
         </Pressable>
     )
