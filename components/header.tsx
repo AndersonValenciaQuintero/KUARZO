@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useCart } from '../context/CartContext';
@@ -32,13 +33,13 @@ const Header = () => {
 
             {/* Área de Acciones */}
             <View className="flex-row items-center gap-6">
-                <Pressable>
+                <Pressable onPress={() => router.push('/login')}>
                     <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
                         Login
                     </Text>
                 </Pressable>
 
-                <Pressable>
+                <Pressable onPress={() => router.push('/register')}>
                     <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
                         Sign Up
                     </Text>
