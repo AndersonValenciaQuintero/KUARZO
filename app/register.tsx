@@ -1,3 +1,4 @@
+import CustomButton from '@/components/CustomButton';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -197,9 +198,18 @@ const RegisterScreen: React.FC = () => {
                         </View>
 
                         {/* Botón */}
-                        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                            <Text style={styles.buttonText}>CREA TU CUENTA</Text>
-                        </TouchableOpacity>
+                        <CustomButton
+                            children='CREA TU CUENTA'
+                            className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
+                            onPress={handleRegister}
+                        />
+                        <CustomButton
+                            onPress={() => router.push('/login')}
+                            variant="text-only"
+                            color="secondary"
+                        >
+                            ¿Ya tienes cuenta? Inicia sesión
+                        </CustomButton>
 
                     </View>
                 </ScrollView>

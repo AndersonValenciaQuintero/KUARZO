@@ -1,3 +1,4 @@
+import CustomButton from '@/components/CustomButton';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -97,14 +98,20 @@ const LoginScreen: React.FC = () => {
                         </View>
 
                         {/* Botón */}
-                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
-                        </TouchableOpacity>
+                        <CustomButton
+                            children='INICIAR SESIÓN'
+                            className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
+                            onPress={handleLogin}
+                        />
 
                         {/* Extra */}
-                        <TouchableOpacity style={styles.link}>
-                            <Text style={styles.linkText} onPress={() => router.push('/register')}>¿No tienes cuenta? Regístrate</Text>
-                        </TouchableOpacity>
+                        <CustomButton
+                            onPress={() => router.push('/register')}
+                            variant="text-only"
+                            color="secondary"
+                        >
+                            ¿No tienes cuenta? Regístrate
+                        </CustomButton>
 
                     </View>
 
