@@ -1,20 +1,22 @@
+import AppHeader from '@/components/AppHeader';
 import CustomButton from '@/components/CustomButton';
-import Header from '@/components/header';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../context/CartContext';
+import { usePlatform } from '../hooks/usePlatform';
 
 export default function CartScreen() {
     const { cartItems, subtotal, updateQuantity, removeItem } = useCart();
+    const platform = usePlatform();
 
     return (
         <SafeAreaView className='flex-1 bg-white'>
             <ScrollView className='flex-1 bg-white'>
-                {/* Header global */}
-                <Header />
+                {/* Header según plataforma */}
+                <AppHeader platform={platform} />
 
                 {/* Boton volver */}
                 <View className="px-10 max-w-7xl mx-auto w-full pt-6">

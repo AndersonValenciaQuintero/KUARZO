@@ -1,7 +1,7 @@
+import { router } from "expo-router";
 import React from 'react';
 import { Image, Pressable, Text, View } from "react-native";
 import { useCart } from '../context/CartContext';
-import { router } from "expo-router";
 
 export const CardProduct = ({ producto }: { producto: any }) => {
     const { addItem } = useCart();
@@ -30,12 +30,12 @@ export const CardProduct = ({ producto }: { producto: any }) => {
                 </View>
             </Pressable>
 
-            {/* Barra inferior: Precio y Botón rojo */}
+            {/* Barra inferior: Precio y Botón amarillo */}
             <View className="flex-row items-stretch mt-4">
 
-                {/* Este es el botón rojo de la imagen que toca los bordes */}
+                {/* Este es el botón amarillo de la imagen que toca los bordes */}
                 <Pressable
-                    className="flex-1 bg-primary justify-center items-center py-4 rounded-md w-1/2 h-10"
+                    className="flex-1 bg-primary justify-center items-center py-3 rounded-md"
                     onPress={() => addItem({
                         id: nombre, // Usamos el nombre como ID temporal
                         nombre: nombre,
@@ -43,7 +43,7 @@ export const CardProduct = ({ producto }: { producto: any }) => {
                         imagen: imagen
                     })}
                 >
-                    <Text className="text-base font-roboto-bold text-black uppercase">
+                    <Text className="text-base font-roboto-medium text-black uppercase">
                         Comprar
                     </Text>
                 </Pressable>

@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../context/CartContext';
 import CartItemSidebar from './CartItemSidebar';
 import CustomButton from './CustomButton';
@@ -21,7 +22,7 @@ const CartSidebar = () => {
     };
 
     return (
-        <View className="absolute top-0 right-0 bottom-0 left-0 z-50 flex-row justify-end" pointerEvents="box-none">
+        <SafeAreaView className="absolute top-0 right-0 bottom-0 left-0 z-50 flex-row justify-end" pointerEvents="box-none">
             {/* Overlay background para cerrar al hacer clic afuera (HERMANO DEL SIDEBAR) */}
             <Pressable
                 className="absolute top-0 right-0 bottom-0 left-0"
@@ -71,7 +72,7 @@ const CartSidebar = () => {
                     </View>
                 )}
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 

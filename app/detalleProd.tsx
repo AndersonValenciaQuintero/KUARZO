@@ -1,7 +1,7 @@
+import AppHeader from '@/components/AppHeader';
 import CustomButton from '@/components/CustomButton';
-import Header from '@/components/header';
-import { useLocalSearchParams, router } from 'expo-router';
 import { MaterialIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
     Image,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../context/CartContext';
+import { usePlatform } from '../hooks/usePlatform';
 
 // Categorias mostradas en la barra horizontal debajo del header.
 const categories = ['Cadenas y Collares', 'Aretes y Pendientes', 'Anillos', 'Pulseras', 'Broches', 'Accesorios'];
@@ -22,6 +23,7 @@ const DetalleProdLayout = () => {
     const { width } = useWindowDimensions();
     const isCompact = width < 1100;
     const { addItem } = useCart();
+    const platform = usePlatform();
 
     const params = useLocalSearchParams();
     const { id, nombre, descripcion, precio, imagen, categoria } = params;
@@ -70,8 +72,8 @@ const DetalleProdLayout = () => {
     return (
         <SafeAreaView className="flex-1 bg-white">
             <ScrollView className="flex-1 bg-white" showsVerticalScrollIndicator={false}>
-                {/* Header reutilizable de la tienda. */}
-                <Header />
+                {/* Header según plataforma. */}
+                <AppHeader platform={platform} />
 
                 <View className="px-8 pt-6 bg-white w-full max-w-6xl mx-auto">
                     <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>

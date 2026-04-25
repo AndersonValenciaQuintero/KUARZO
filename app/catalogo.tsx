@@ -1,6 +1,8 @@
+import AppFooter from "@/components/AppFooter";
+import AppHeader from "@/components/AppHeader";
 import { CardProduct } from "@/components/CardProduct";
-import FlutterComponent from "@/components/Flutter";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Pressable,
@@ -10,8 +12,7 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../components/header";
-import { router } from "expo-router";
+import { usePlatform } from "../hooks/usePlatform";
 
 type Producto = {
   id: string;
@@ -126,6 +127,7 @@ const secciones = [
 
 const CatalogoScreen = () => {
   const { width } = useWindowDimensions();
+  const platform = usePlatform();
   const [grupoActivo, setGrupoActivo] = useState("TODOS");
   const [categoriaActiva, setCategoriaActiva] = useState("Todos");
 
@@ -141,15 +143,15 @@ const CatalogoScreen = () => {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1 bg-white">
         {/* HEADER */}
-        <Header />
+        <AppHeader platform={platform} />
 
         <View className="px-5 pt-6 bg-white w-full">
-            <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
-                <MaterialIcons name="arrow-back" size={20} color="#111827" />
-                <Text className="font-roboto-bold text-sm text-[#111827]">
-                    Volver
-                </Text>
-            </Pressable>
+          <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
+            <MaterialIcons name="arrow-back" size={20} color="#111827" />
+            <Text className="font-roboto-bold text-sm text-[#111827]">
+              Volver
+            </Text>
+          </Pressable>
         </View>
 
         {/* CATÁLOGO */}
@@ -281,7 +283,7 @@ const CatalogoScreen = () => {
             </View>
           </View>
         </View>
-        <FlutterComponent />
+        <AppFooter platform={platform} />
       </ScrollView>
     </SafeAreaView>
   );
