@@ -48,7 +48,7 @@ const HomeWeb = () => {
             PRODUCTOS DESTACADOS
           </Text>
         </View>
-        <View className="mb-8 mx-80 px-8 py-10">
+        <View className="mb-8 mx-10 px-6 py-8 w-60">
           <Carrusel
             type="products"
             products={sampleProducts}
@@ -73,6 +73,7 @@ const HomeWeb = () => {
             />
           </View>
         </View>
+
 
         {/* 5. FOOTER WEB */}
         <AppFooter platform="web" />

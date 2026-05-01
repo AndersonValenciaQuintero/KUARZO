@@ -1,10 +1,11 @@
 import { router } from "expo-router";
 import React from 'react';
 import { Image, Pressable, Text, View } from "react-native";
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '@/src/store/useCartStore';
 
 export const CardProduct = ({ producto }: { producto: any }) => {
-    const { addItem } = useCart();
+    const { addItem } = useCartStore();
+
     const { id, nombre, descripcion, precio, imagen, categoria } = producto;
 
     return (
@@ -40,8 +41,10 @@ export const CardProduct = ({ producto }: { producto: any }) => {
                         id: nombre, // Usamos el nombre como ID temporal
                         nombre: nombre,
                         precio: precio,
-                        imagen: imagen
+                        imagen: imagen,
+                        cantidad: 1
                     })}
+
                 >
                     <Text className="text-base font-roboto-medium text-black uppercase">
                         Comprar

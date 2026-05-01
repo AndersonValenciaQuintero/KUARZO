@@ -2,10 +2,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '@/src/store/useCartStore';
 
 const Header = () => {
-    const { toggleSidebar, totalItems } = useCart();
+    const { toggleSidebar, items } = useCartStore();
+    const totalItems = items.reduce((acc, curr) => acc + curr.cantidad, 0);
+
     return (
         <View className="flex-row items-center justify-between w-full px-6 py-4 bg-white shadow-sm">
 

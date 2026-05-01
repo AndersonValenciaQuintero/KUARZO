@@ -8,7 +8,8 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { useCart } from "../context/CartContext";
+import { useCartStore } from "@/src/store/useCartStore";
+
 
 type Producto = {
   id: string;
@@ -124,7 +125,8 @@ const formatearPrecio = (precio: number) =>
   `$${new Intl.NumberFormat("es-CO").format(precio)}`;
 
 const Catalogo = () => {
-  const { addItem, totalItems } = useCart();
+  const { addItem, items } = useCartStore();
+  const totalItems = items.reduce((acc, curr) => acc + curr.cantidad, 0);
   const { width } = useWindowDimensions();
   const [grupoActivo, setGrupoActivo] = useState<"NUEVO" | "SPORT">("NUEVO");
   const [categoriaActiva, setCategoriaActiva] = useState("Todos");
@@ -277,6 +279,7 @@ const Catalogo = () => {
                       nombre: producto.nombre,
                       precio: producto.precio,
                       imagen: producto.imagen,
+                      cantidad: 1
                     })
                   }
                 >

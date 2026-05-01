@@ -1,11 +1,11 @@
 import AppHeader from '@/components/AppHeader';
 import CustomButton from '@/components/CustomButton';
+import { useCartStore } from '@/src/store/useCartStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCartStore } from '@/src/store/useCartStore';
 
 export default function CartWeb() {
     const { items: cartItems, updateQuantity, removeItem, getTotal } = useCartStore();
@@ -14,8 +14,10 @@ export default function CartWeb() {
     return (
         <SafeAreaView className='flex-1 bg-white'>
             <ScrollView className='flex-1 bg-white'>
+                {/* Header global */}
                 <AppHeader platform="web" />
 
+                {/* Boton volver */}
                 <View className="px-10 max-w-7xl mx-auto w-full pt-6">
                     <Pressable className="mb-4 flex-row items-center gap-2 self-start" onPress={() => router.back()}>
                         <MaterialIcons name="arrow-back" size={20} color="#111827" />
@@ -25,15 +27,25 @@ export default function CartWeb() {
                     </Pressable>
                 </View>
 
+                {/* Contenido Principal */}
                 <View className="px-10 max-w-7xl mx-auto w-full flex-row">
+
+                    {/* Lado izquierdo: Lista de Productos */}
                     <View className="flex-1 pr-10">
                         <Text className="text-3xl font-bold text-gray-800 mb-6">Carrito de compra</Text>
+
+                        <View className="flex-row items-center mb-6 pb-2 border-b border-[#9ca3af]">
+                            <MaterialIcons name="check-box-outline-blank" size={24} color="#9ca3af" />
+                            <Text className="ml-2 text-gray-700 font-medium text-base">Seleccionar todos los productos</Text>
+                        </View>
 
                         {cartItems.length === 0 ? (
                             <Text className="text-gray-500 text-lg">No hay productos en el carrito.</Text>
                         ) : (
                             cartItems.map((item) => (
                                 <View key={item.id} className="flex-row items-center border-b border-[#9ca3af] py-6">
+                                    <MaterialIcons name="check-box-outline-blank" size={24} color="#9ca3af" />
+
                                     <View className="border border-[#9ca3af] p-2 ml-4 rounded-md">
                                         <Image
                                             source={{ uri: item.imagen }}
@@ -48,7 +60,7 @@ export default function CartWeb() {
                                         <View className="flex-row items-center border border-[#9ca3af] rounded-md w-28 mt-2">
                                             <Pressable
                                                 className="px-3 py-1 bg-white hover:bg-gray-100 flex-1 items-center"
-                                                onPress={() => updateQuantity(item.id, Math.max(1, item.cantidad - 1))}
+                                                onPress={() => updateQuantity(item.id, item.cantidad - 1)}
                                             >
                                                 <Text className="text-gray-600 text-xl font-bold">-</Text>
                                             </Pressable>
@@ -73,6 +85,7 @@ export default function CartWeb() {
                         )}
                     </View>
 
+                    {/* Lado derecho: Resumen */}
                     <View className="w-[380px] mt-16">
                         <Text className="text-xl font-bold text-gray-800 mb-6">Resumen de compra</Text>
 
@@ -99,6 +112,7 @@ export default function CartWeb() {
                             Finalizar Compra
                         </CustomButton>
                     </View>
+
                 </View>
             </ScrollView>
         </SafeAreaView>
