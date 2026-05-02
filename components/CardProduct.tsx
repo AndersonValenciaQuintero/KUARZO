@@ -9,6 +9,12 @@ export const CardProduct = ({ producto }: { producto: any }) => {
     const platform = usePlatform();
     const { width } = useWindowDimensions();
     const isMobile = platform === 'movil' || width < 760;
+import { Image, Pressable, Text, View } from "react-native";
+import { useCartStore } from '@/src/store/useCartStore';
+
+export const CardProduct = ({ producto }: { producto: any }) => {
+    const { addItem } = useCartStore();
+
     const { id, nombre, descripcion, precio, imagen, categoria } = producto;
 
     return (
@@ -44,8 +50,10 @@ export const CardProduct = ({ producto }: { producto: any }) => {
                         id: nombre,
                         nombre: nombre,
                         precio: precio,
-                        imagen: imagen
+                        imagen: imagen,
+                        cantidad: 1
                     })}
+
                 >
                     <Text
                         className={`${isMobile ? 'text-sm' : 'text-base'} font-roboto-medium text-black uppercase text-center leading-5`}

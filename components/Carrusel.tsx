@@ -9,7 +9,7 @@ import {
   useWindowDimensions,
   View
 } from 'react-native';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '@/src/store/useCartStore';
 
 export type ProductData = {
   id?: string | number;
@@ -54,7 +54,7 @@ export default function Carrusel({
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const autoPlayInterval = 3500;
-  const { addItem } = useCart();
+  const { addItem } = useCartStore();
 
   // Autoplay para el modo slide de imágenes (Banners promocionales)
   useEffect(() => {
@@ -194,7 +194,8 @@ export default function Carrusel({
                     id: String(item.id || item.cod || item.nombre),
                     nombre: item.nombre,
                     precio: Number(item.precio) || 0,
-                    imagen: item.imagen
+                    imagen: item.imagen,
+                    cantidad: 1
                   })}
                 >
                   <Text className="text-xl font-roboto-bold text-quaternary-950 ">Comprar</Text>

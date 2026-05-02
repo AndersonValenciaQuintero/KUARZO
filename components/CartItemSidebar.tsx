@@ -1,13 +1,14 @@
 import React from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
-import { CartItem, useCart } from '../context/CartContext';
+import { useCartStore } from '@/src/store/useCartStore';
 
 interface Props {
-  item: CartItem;
+  item: any;
 }
 
 const CartItemSidebar = ({ item }: Props) => {
-  const { updateQuantity } = useCart();
+  const { updateQuantity } = useCartStore();
+
 
   return (
     <View className="flex-row items-center border-b border-gray-200 py-4 px-4 bg-white">

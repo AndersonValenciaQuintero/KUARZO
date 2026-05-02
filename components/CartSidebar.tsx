@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '@/src/store/useCartStore';
 import CartItemSidebar from './CartItemSidebar';
 import CustomButton from './CustomButton';
 
@@ -11,7 +11,9 @@ import CustomButton from './CustomButton';
 const { height } = Dimensions.get('window');
 
 const CartSidebar = () => {
-    const { isSidebarOpen, toggleSidebar, cartItems, subtotal } = useCart();
+    const { isSidebarOpen, toggleSidebar, items: cartItems, getTotal } = useCartStore();
+    const subtotal = getTotal();
+
     const router = useRouter();
 
     if (!isSidebarOpen) return null;

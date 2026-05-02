@@ -10,24 +10,34 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  isSidebarOpen: boolean;
   addItem: (item: CartItem) => void;
   removeItem: (id: number | string) => void;
   updateQuantity: (id: number | string, cantidad: number) => void;
   clearCart: () => void;
   getTotal: () => number;
+  toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
-  addItem: (item) => set((state) => {
-    const existingItem = state.items.find(i => i.id === item.id);
-    if (existingItem) {
-      return {
-        items: state.items.map(i => i.id === item.id ? { ...i, cantidad: i.cantidad + item.cantidad } : i)
+  isSidebarOpen: false,
+  addItem: (item) => {
+    set((state) => {
+      const existingItem = state.items.find(i => i.id === item.id);
+      if (existingItem) {
+        return {
+          items: state.items.map(i => i.id === item.id ? { ...i, cantidad: i.cantidad + item.cantidad } : i),
+          isSidebarOpen: true
+        };
+      }
+      return { 
+        items: [...state.items, item],
+        isSidebarOpen: true
       };
-    }
-    return { items: [...state.items, item] };
-  }),
+    });
+  },
   removeItem: (id) => set((state) => ({
     items: state.items.filter(i => i.id !== id)
   })),
@@ -37,5 +47,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   clearCart: () => set({ items: [] }),
   getTotal: () => {
     return get().items.reduce((total, item) => total + (item.precio * item.cantidad), 0);
-  }
+  },
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  setSidebarOpen: (open) => set({ isSidebarOpen: open })
 }));
