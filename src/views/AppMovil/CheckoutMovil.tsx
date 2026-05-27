@@ -16,8 +16,9 @@ import AppHeader from "@/components/AppHeader";
 import { useCartStore } from "@/src/store/useCartStore";
 
 const CheckoutMovil = () => {
-    const { items: cartItems, getTotal } = useCartStore();
-    const subtotal = getTotal();
+    const { items: cartItems, getSelectedTotal, clearSelectedItems } = useCartStore();
+    const selectedItems = cartItems.filter(item => item.selected !== false);
+    const subtotal = getSelectedTotal();
     const [metodoPago, setMetodoPago] = useState("Tarjeta");
 
     const [form, setForm] = useState({
@@ -35,10 +36,10 @@ const CheckoutMovil = () => {
         `$${new Intl.NumberFormat("es-CO").format(precio)}`;
 
     const costoEnvio = 15000;
-    const total = subtotal + (cartItems.length > 0 ? costoEnvio : 0);
+    const total = subtotal + (selectedItems.length > 0 ? costoEnvio : 0);
 
     const handlePagar = () => {
-        if (cartItems.length === 0) {
+        if (selectedItems.length === 0) {
             Alert.alert("Carrito vacío", "Agrega productos antes de continuar.");
             return;
         }
@@ -49,7 +50,16 @@ const CheckoutMovil = () => {
 
         Alert.alert(
             "Pedido creado con éxito",
-            `Serás redirigido a la pasarela de pagos pronto.\n\nMétodo seleccionado: ${metodoPago}\nTotal a pagar: ${formatearPrecio(total)}`
+            `Serás redirigido a la pasarela de pagos pronto.\n\nMétodo seleccionado: ${metodoPago}\nTotal a pagar: ${formatearPrecio(total)}`,
+            [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        clearSelectedItems();
+                        router.replace('/');
+                    }
+                }
+            ]
         );
     };
 
@@ -154,7 +164,7 @@ const CheckoutMovil = () => {
                                 </View>
                                 <View className="mb-2 flex-row justify-between">
                                     <Text className="text-sm text-[#6b7280]">Envío</Text>
-                                    <Text className="font-roboto-medium text-sm text-[#111827]">{cartItems.length > 0 ? formatearPrecio(costoEnvio) : "$0"}</Text>
+                                    <Text className="font-roboto-medium text-sm text-[#111827]">{selectedItems.length > 0 ? formatearPrecio(costoEnvio) : "$0"}</Text>
                                 </View>
                                 <View className="my-4 flex-row justify-between border-t border-[#eef1f5] pt-4">
                                     <Text className="font-roboto-bold text-lg text-[#111827]">Total a Pagar</Text>

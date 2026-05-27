@@ -1,7 +1,7 @@
 export const sampleProducts = [
   {
     id: 1,
-    nombre: "Pulsera Piedra Volcánica",
+    nombre: "",
     descripcion: "Pulsera elaborada con piedras volcanicas y dijes de acero inoxidable.",
     precio: 45000,
     categoria: "Pulseras",

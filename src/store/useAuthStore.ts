@@ -1,8 +1,10 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface User {
-  id: string | number;
-  nombre: string;
+export interface User {
+  id: number;
+  primerNombre: string;
+  primerApellido: string;
   correo: string;
   rol: string;
 }
@@ -11,12 +13,41 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   login: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  login: (user) => set({ user, isAuthenticated: true }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  login: (user) => {
+    AsyncStorage.setItem('user_info', JSON.stringify(user)).catch((e) => {
+      console.error('Error al guardar el usuario en AsyncStorage:', e);
+    });
+    set({ user, isAuthenticated: true });
+  },
+  logout: async () => {
+    try {
+      await AsyncStorage.removeItem('user_token');
+      await AsyncStorage.removeItem('user_info');
+    } catch (e) {
+      console.error('Error al remover la sesión en logout:', e);
+    }
+    set({ user: null, isAuthenticated: false });
+  },
+  initializeAuth: async () => {
+    try {
+      const token = await AsyncStorage.getItem('user_token');
+      const userInfoStr = await AsyncStorage.getItem('user_info');
+      if (token && userInfoStr) {
+        const user = JSON.parse(userInfoStr);
+        set({ user, isAuthenticated: true });
+      } else {
+        set({ user: null, isAuthenticated: false });
+      }
+    } catch (e) {
+      console.error('Error al inicializar la autenticación:', e);
+      set({ user: null, isAuthenticated: false });
+    }
+  },
 }));

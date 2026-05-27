@@ -14,8 +14,10 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    ActivityIndicator,
 } from 'react-native';
+import { authService } from '@/src/services/authService';
 
 const RegisterScreen: React.FC = () => {
 
@@ -27,11 +29,12 @@ const RegisterScreen: React.FC = () => {
     const [telefono, setTelefono] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showPassword2, setShowPassword2] = useState<boolean>(false);
 
-    const handleRegister = (): void => {
+    const handleRegister = async (): Promise<void> => {
         if (!primerNombre || !primerApellido || !correo || !password) {
             Alert.alert('Error', 'Completa los campos obligatorios');
             return;
@@ -47,7 +50,28 @@ const RegisterScreen: React.FC = () => {
             return;
         }
 
-        Alert.alert('Éxito', 'Usuario registrado correctamente');
+        setIsLoading(true);
+        try {
+            const response = await authService.register({
+                primerNombre,
+                segundoNombre: segundoNombre || undefined,
+                primerApellido,
+                segundoApellido: segundoApellido || undefined,
+                correo,
+                contrasena: password,
+                telefono: telefono || undefined,
+                rolId: 1, // Por defecto rol de COMPRADOR
+            });
+
+            Alert.alert('Éxito', response.message || 'Usuario registrado correctamente');
+            router.push('/login'); // Redirigir al inicio de sesión
+        } catch (error: any) {
+            console.error('Error en RegisterMovil:', error);
+            const errorMsg = error.response?.data?.error || 'No se pudo completar el registro';
+            Alert.alert('Error de Registro', errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -199,14 +223,17 @@ const RegisterScreen: React.FC = () => {
 
                         {/* Botón */}
                         <CustomButton
-                            children='CREA TU CUENTA'
                             className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
                             onPress={handleRegister}
-                        />
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'CARGANDO...' : 'CREA TU CUENTA'}
+                        </CustomButton>
                         <CustomButton
                             onPress={() => router.push('/login')}
                             variant="text-only"
                             color="secondary"
+                            disabled={isLoading}
                         >
                             ¿Ya tienes cuenta? Inicia sesión
                         </CustomButton>

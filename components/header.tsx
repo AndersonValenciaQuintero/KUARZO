@@ -3,13 +3,23 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useCartStore } from '@/src/store/useCartStore';
+import { useAuthStore } from '@/src/store/useAuthStore';
 
 const Header = () => {
     const { toggleSidebar, items } = useCartStore();
     const totalItems = items.reduce((acc, curr) => acc + curr.cantidad, 0);
 
+    const user = useAuthStore((state) => state.user);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const logout = useAuthStore((state) => state.logout);
+
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
+
+    const handleLogout = async () => {
+        await logout();
+        router.replace('/');
+    };
 
     return (
         <View 
@@ -40,9 +50,20 @@ const Header = () => {
             {/* Si es móvil, mostramos las acciones aquí para que queden al lado del logo */}
             {isMobile && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <Pressable onPress={() => router.push('/login')}>
-                        <Text className="text-base font-roboto-medium text-gray-700">Login</Text>
-                    </Pressable>
+                    {isAuthenticated && user ? (
+                        <>
+                            <Text className="text-base font-roboto-medium text-gray-700">
+                                Hola, {user.primerNombre}
+                            </Text>
+                            <Pressable onPress={handleLogout}>
+                                <MaterialIcons name="logout" size={22} color="#4B5563" />
+                            </Pressable>
+                        </>
+                    ) : (
+                        <Pressable onPress={() => router.push('/login')}>
+                            <Text className="text-base font-roboto-medium text-gray-700">Login</Text>
+                        </Pressable>
+                    )}
                     <Pressable className="ml-2 relative" onPress={toggleSidebar}>
                         <MaterialIcons name="shopping-cart" size={24} color="#4B5563" />
                         {totalItems > 0 && (
@@ -71,16 +92,31 @@ const Header = () => {
             {/* Área de Acciones - Solo se muestra aquí en Desktop */}
             {!isMobile && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24 }}>
-                    <Pressable onPress={() => router.push('/login')}>
-                        <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
-                            Login
-                        </Text>
-                    </Pressable>
-                    <Pressable onPress={() => router.push('/register')}>
-                        <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
-                            Sign Up
-                        </Text>
-                    </Pressable>
+                    {isAuthenticated && user ? (
+                        <>
+                            <Text className="text-base font-roboto-medium text-gray-700">
+                                Hola, {user.primerNombre}
+                            </Text>
+                            <Pressable onPress={handleLogout}>
+                                <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
+                                    Salir
+                                </Text>
+                            </Pressable>
+                        </>
+                    ) : (
+                        <>
+                            <Pressable onPress={() => router.push('/login')}>
+                                <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
+                                    Login
+                                </Text>
+                            </Pressable>
+                            <Pressable onPress={() => router.push('/register')}>
+                                <Text className="text-base font-roboto-medium text-gray-700 hover:text-gray-900">
+                                    Sign Up
+                                </Text>
+                            </Pressable>
+                        </>
+                    )}
                     <Pressable className="ml-2 relative" onPress={toggleSidebar}>
                         <MaterialIcons name="shopping-cart" size={24} color="#4B5563" />
                         {totalItems > 0 && (

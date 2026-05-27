@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import React from 'react';
 import { Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
@@ -8,17 +9,21 @@ export default function FlutterComponent() {
   const isMobile = width < 900;
   return (
     <View className="bg-quaternary-950 pt-12 pb-8 mt-4 [40px]">
-      <View className={`px-6 ${isMobile ? 'flex flex-col gap-6' : 'flex flex-row items-start justify-between'}`}>
+      <View className={`px-6 ${isMobile ? 'flex flex-col gap-6' : 'flex flex-row items-center justify-between'}`}>
         {/* LOGO */}
-        <View className={`flex-row items-left mb-6 flex flex-col ${isMobile ? 'w-full' : 'w-1/3'}`}>
-          <Text className="text-quaternary-500 text-3xl font-extrabold tracking-widest">KUARZO</Text>
-          <Text className="text-quaternary-500 text-sm mb-8">
+        <View className={`mb-6 ${isMobile ? 'w-full items-start' : 'w-1/3 items-start'}`}>
+          <Image
+            source={require('@/assets/images/logo3.png')}
+            className="w-48 h-48"
+            resizeMode="contain"
+          />
+          <Text className="text-quaternary-500 text-sm">
             Joyería exclusiva, piezas de lujo únicas y accesorios para tu estilo diario.
           </Text>
         </View>
 
         {/* POLITICAS */}
-        <View className={`mb-8 flex flex-col ${isMobile ? 'w-full' : 'w-1/3'}`}>
+        <View className={`mb-8 ${isMobile ? 'w-full items-start' : 'w-1/3 items-center'}`}>
           <Text className="text-quaternary-500 text-xs font-bold uppercase tracking-widest mb-4">Información y Ayuda</Text>
           <View>
             <TouchableOpacity className="mb-3">
@@ -27,17 +32,11 @@ export default function FlutterComponent() {
             <TouchableOpacity className="mb-3">
               <Text className="text-quaternary-500 text-sm">Términos y Condiciones</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="mb-3">
-              <Text className="text-quaternary-500 text-sm">Políticas de Envío</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="mb-3">
-              <Text className="text-quaternary-500 text-sm">Políticas de Devolución</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
         {/* REDES SOCIALES */}
-        <View className={`mb-8 flex flex-col ${isMobile ? 'w-full' : 'w-1/3'}`}>
+        <View className={`mb-8 ${isMobile ? 'w-full items-start' : 'w-1/3 items-end'}`}>
           <Text className="text-quaternary-500 text-xs font-bold uppercase tracking-widest mb-4">Nuestras Redes</Text>
           <View className="flex-row flex-wrap gap-3">
             <TouchableOpacity className="bg-gray-800 p-3 rounded-full justify-center items-center">

@@ -209,7 +209,7 @@ const PRODUCT_GRID_SPACING = {
   desktopWidth: "18.3%",
   tabletWidth: "48%",
   mobileWidth: "100%",
-};
+} as const;
 
 const CatalogoScreen = () => {
   const { width } = useWindowDimensions();

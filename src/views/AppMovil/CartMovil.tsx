@@ -36,7 +36,7 @@ export default function CartMovil() {
                                 <View key={item.id} className="flex-row items-center border-b border-[#9ca3af] py-4">
                                     <View className="border border-[#9ca3af] p-1 rounded-md">
                                         <Image
-                                            source={{ uri: item.imagen }}
+                                            source={typeof item.imagen === 'string' ? { uri: item.imagen } : item.imagen}
                                             className="w-16 h-16 bg-gray-100 rounded-sm"
                                             resizeMode="cover"
                                         />
@@ -48,7 +48,7 @@ export default function CartMovil() {
                                         <View className="flex-row items-center border border-[#9ca3af] rounded-md w-24 mt-2">
                                             <Pressable
                                                 className="px-2 py-1 bg-white flex-1 items-center"
-                                                onPress={() => updateQuantity(item.id, Math.max(1, item.cantidad - 1))}
+                                                onPress={() => updateQuantity(item.id, item.cantidad - 1)}
                                             >
                                                 <Text className="text-gray-600 text-lg font-bold">-</Text>
                                             </Pressable>

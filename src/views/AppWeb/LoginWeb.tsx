@@ -1,17 +1,20 @@
 import CustomButton from '@/components/CustomButton';
-import { Ionicons } from '@expo/vector-icons';
+import { authService } from '@/src/services/authService';
+import { useAuthStore } from '@/src/store/useAuthStore';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
-    useWindowDimensions,
+    useWindowDimensions
 } from 'react-native';
 
 const LoginWeb: React.FC = () => {
@@ -19,24 +22,60 @@ const LoginWeb: React.FC = () => {
     const [correo, setCorreo] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const loginStore = useAuthStore((state: any) => state.login);
 
     const { width: windowWidth } = useWindowDimensions();
     const isSmallScreen = windowWidth < 800;
 
-    const handleLogin = (): void => {
+    const handleLogin = async (): Promise<void> => {
         if (!correo || !password) {
-            Alert.alert('Error', 'Completa todos los campos');
+            window.alert('Completa todos los campos');
             return;
         }
-        console.log({ correo, password });
-        Alert.alert('Éxito', 'Inicio de sesión correcto (simulado)');
+
+        setIsLoading(true);
+        try {
+            const response = await authService.login({
+                correo,
+                contrasena: password,
+            });
+
+            await AsyncStorage.setItem('user_token', response.token);
+
+            loginStore({
+                id: response.usuario.id,
+                primerNombre: response.usuario.primerNombre,
+                primerApellido: response.usuario.primerApellido,
+                correo: response.usuario.correo,
+                rol: response.usuario.rol,
+            });
+
+            router.replace('/');
+        } catch (error: any) {
+            console.error('Error en LoginWeb:', error);
+            const errorMsg = error.response?.data?.error || 'Credenciales incorrectas o error de conexión';
+            window.alert(errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-            <View 
-                style={{ 
+            <View className="px-5 pt-6 bg-white w-full">
+                <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
+                    <MaterialIcons name="arrow-back" size={20} color="#111827" />
+                    <Text className="font-roboto-bold text-sm text-[#111827]">
+                        Volver
+                    </Text>
+                </Pressable>
+            </View>
+
+            <View
+                style={{
                     flexDirection: isSmallScreen ? 'column' : 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -54,7 +93,7 @@ const LoginWeb: React.FC = () => {
 
                 {/* Right Side: Form */}
                 <View style={styles.card}>
-                    <Text style={styles.title}>Iniciar sesión en la Web</Text>
+                    <Text style={styles.title}>Inicia Sesión</Text>
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Correo electrónico</Text>
@@ -65,6 +104,7 @@ const LoginWeb: React.FC = () => {
                             keyboardType="email-address"
                             autoCapitalize="none"
                             onChangeText={setCorreo}
+                            editable={!isLoading}
                         />
                     </View>
 
@@ -78,8 +118,9 @@ const LoginWeb: React.FC = () => {
                                 secureTextEntry={!showPassword}
                                 onChangeText={setPassword}
                                 value={password}
+                                editable={!isLoading}
                             />
-                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
                                 <Ionicons
                                     name={showPassword ? "eye-outline" : "eye-off-outline"}
                                     size={22}
@@ -90,15 +131,18 @@ const LoginWeb: React.FC = () => {
                     </View>
 
                     <CustomButton
-                        children='INICIAR SESIÓN'
                         className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
                         onPress={handleLogin}
-                    />
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'CARGANDO...' : 'INICIAR SESIÓN'}
+                    </CustomButton>
 
                     <CustomButton
                         onPress={() => router.push('/register')}
                         variant="text-only"
                         color="secondary"
+                        disabled={isLoading}
                     >
                         ¿No tienes cuenta? Regístrate
                     </CustomButton>

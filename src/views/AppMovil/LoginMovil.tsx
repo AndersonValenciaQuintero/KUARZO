@@ -14,22 +14,53 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
+import { authService } from '@/src/services/authService';
+import { useAuthStore } from '@/src/store/useAuthStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginMovil: React.FC = () => {
 
     const [correo, setCorreo] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleLogin = (): void => {
+    const loginStore = useAuthStore((state: any) => state.login);
+
+    const handleLogin = async (): Promise<void> => {
         if (!correo || !password) {
             Alert.alert('Error', 'Completa todos los campos');
             return;
         }
-        console.log({ correo, password });
-        Alert.alert('Éxito', 'Inicio de sesión correcto (simulado)');
+
+        setIsLoading(true);
+        try {
+            const response = await authService.login({
+                correo,
+                contrasena: password,
+            });
+
+            await AsyncStorage.setItem('user_token', response.token);
+
+            loginStore({
+                id: response.usuario.id,
+                primerNombre: response.usuario.primerNombre,
+                primerApellido: response.usuario.primerApellido,
+                correo: response.usuario.correo,
+                rol: response.usuario.rol,
+            });
+
+            Alert.alert('Éxito', response.message);
+            router.replace('/'); // Redirigir a la pantalla principal
+        } catch (error: any) {
+            console.error('Error en LoginMovil:', error);
+            const errorMsg = error.response?.data?.error || 'Credenciales incorrectas o error de conexión';
+            Alert.alert('Error de Inicio de Sesión', errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -41,7 +72,7 @@ const LoginMovil: React.FC = () => {
                 <ScrollView contentContainerStyle={styles.container}>
 
                     <View className="bg-white w-full mx-auto">
-                        <Pressable className="flex-row items-center gap-2 self-start mt-6" onPress={() => router.back()}>
+                        <Pressable className="flex-row items-center gap-2 self-start mt-6" onPress={() => router.back()} disabled={isLoading}>
                             <MaterialIcons name="arrow-back" size={20} color="#111827" />
                             <Text className="font-roboto-bold text-sm text-[#111827]">
                                 Volver
@@ -69,6 +100,7 @@ const LoginMovil: React.FC = () => {
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 onChangeText={setCorreo}
+                                editable={!isLoading}
                             />
                         </View>
 
@@ -83,8 +115,9 @@ const LoginMovil: React.FC = () => {
                                     secureTextEntry={!showPassword}
                                     onChangeText={setPassword}
                                     value={password}
+                                    editable={!isLoading}
                                 />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
                                     <Ionicons
                                         name={showPassword ? "eye-outline" : "eye-off-outline"}
                                         size={22}
@@ -96,16 +129,19 @@ const LoginMovil: React.FC = () => {
 
                         {/* Botón */}
                         <CustomButton
-                            children='INICIAR SESIÓN'
                             className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
                             onPress={handleLogin}
-                        />
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'CARGANDO...' : 'INICIAR SESIÓN'}
+                        </CustomButton>
 
                         {/* Extra */}
                         <CustomButton
                             onPress={() => router.push('/register')}
                             variant="text-only"
                             color="secondary"
+                            disabled={isLoading}
                         >
                             ¿No tienes cuenta? Regístrate
                         </CustomButton>

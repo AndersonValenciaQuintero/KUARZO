@@ -1,9 +1,10 @@
 import AppHeader from "@/components/AppHeader";
 import CustomButton from "@/components/CustomButton";
 import { useCartStore } from "@/src/store/useCartStore";
+import api from "@/src/services/api";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect } from "react";
 import {
     Alert,
     Image,
@@ -17,9 +18,51 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const CheckoutWeb = () => {
-    const { items: cartItems, getTotal } = useCartStore();
-    const subtotal = getTotal();
+    const { items: cartItems, getSelectedTotal, clearSelectedItems } = useCartStore();
+    const selectedItems = cartItems.filter(item => item.selected !== false);
+    const subtotal = getSelectedTotal();
     const [metodoPago, setMetodoPago] = useState("Tarjeta");
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // Obtener parámetros de redirección de Mercado Pago
+    const { status } = useLocalSearchParams<{ status?: string }>();
+
+    useEffect(() => {
+        if (status === 'success' || status === 'approved') {
+            Alert.alert(
+                "¡Pago Exitoso!",
+                "Tu pedido ha sido creado y pagado correctamente. ¡Muchas gracias por tu compra!",
+                [
+                    {
+                        text: "Ir al inicio",
+                        onPress: () => {
+                            clearSelectedItems();
+                            router.replace('/');
+                        }
+                    }
+                ]
+            );
+        } else if (status === 'failure') {
+            Alert.alert(
+                "Pago Fallido",
+                "Hubo un problema al procesar el pago. Por favor intenta nuevamente."
+            );
+        } else if (status === 'pending') {
+            Alert.alert(
+                "Pago Pendiente",
+                "Tu pago está en estado pendiente. Te notificaremos cuando se apruebe.",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            clearSelectedItems();
+                            router.replace('/');
+                        }
+                    }
+                ]
+            );
+        }
+    }, [status]);
 
     const [form, setForm] = useState({
         nombre: "",
@@ -40,10 +83,10 @@ const CheckoutWeb = () => {
         `$${new Intl.NumberFormat("es-CO").format(precio)}`;
 
     const costoEnvio = 15000;
-    const total = subtotal + (cartItems.length > 0 ? costoEnvio : 0);
+    const total = subtotal + (selectedItems.length > 0 ? costoEnvio : 0);
 
-    const handlePagar = () => {
-        if (cartItems.length === 0) {
+    const handlePagar = async () => {
+        if (selectedItems.length === 0) {
             Alert.alert("Carrito vacío", "Agrega productos antes de continuar.");
             return;
         }
@@ -52,16 +95,41 @@ const CheckoutWeb = () => {
             return;
         }
 
-        Alert.alert(
-            "Pedido creado con éxito",
-            `Serás redirigido a la pasarela de pagos pronto.\n\nMétodo seleccionado: ${metodoPago}\nTotal a pagar: ${formatearPrecio(total)}`
-        );
-        console.log("Pedido generado: ", {
-            cliente: form,
-            productos: cartItems,
-            total,
-            metodoPago,
-        });
+        try {
+            setIsProcessing(true);
+
+            // 1. Obtener origen de redirección dinámica
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8081';
+            
+            // 2. Crear la preferencia de pago en el backend
+            const response = await api.post('/payments/crear-preferencia', {
+                productos: selectedItems,
+                backUrlOrigin: origin,
+            });
+
+            const { init_point } = response.data;
+
+            if (init_point) {
+                // 3. Redirigir a Mercado Pago en la misma ventana del navegador
+                if (typeof window !== 'undefined') {
+                    window.location.href = init_point;
+                } else {
+                    // Fallback para native (no debería llegar aquí desde web)
+                    const { Linking } = require('react-native');
+                    Linking.openURL(init_point);
+                }
+            } else {
+                throw new Error("No se pudo obtener la URL de pago.");
+            }
+        } catch (error) {
+            console.error("Error al procesar el pago: ", error);
+            Alert.alert(
+                "Error de Pago",
+                "No se pudo conectar con la pasarela de pagos. Por favor intenta más tarde."
+            );
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -80,9 +148,9 @@ const CheckoutWeb = () => {
                         Finalizar Compra (Checkout)
                     </Text>
 
-                    <View style={{ 
-                        flexDirection: isSmallScreen ? 'column' : 'row', 
-                        gap: 40 
+                    <View style={{
+                        flexDirection: isSmallScreen ? 'column' : 'row',
+                        gap: 40
                     }}>
                         {/* LADO IZQUIERDO: FORMULARIOS */}
                         <View style={{ flex: 1, minWidth: isSmallScreen ? '100%' : 350 }}>
@@ -192,10 +260,10 @@ const CheckoutWeb = () => {
                             <View className="rounded-2xl bg-white p-6">
                                 <Text className="mb-5 font-roboto-bold text-xl text-[#111827]">Tu Pedido</Text>
                                 <ScrollView className="max-h-80 mb-4">
-                                    {cartItems.map((item) => (
+                                    {selectedItems.map((item) => (
                                         <View key={item.id} className="mb-4 flex-row items-center border-b border-[#f6f7fb] pb-4">
                                             <View className="h-16 w-16 overflow-hidden rounded-xl bg-[#f5f7fa]">
-                                                <Image source={{ uri: item.imagen }} className="h-full w-full" resizeMode="contain" />
+                                                <Image source={typeof item.imagen === 'string' ? { uri: item.imagen } : item.imagen} className="h-full w-full" resizeMode="contain" />
                                             </View>
                                             <View className="ml-3 flex-1">
                                                 <Text className="text-sm text-[#111827]">{item.nombre}</Text>
@@ -210,13 +278,13 @@ const CheckoutWeb = () => {
 
                                 <View className="border-t border-[#eef1f5] pt-4">
                                     <View className="mb-3 flex-row justify-between">
-                                        <Text className="text-sm text-[#6b7280]">Subtotal ({cartItems.length} items)</Text>
+                                        <Text className="text-sm text-[#6b7280]">Subtotal ({selectedItems.length} items)</Text>
                                         <Text className="font-roboto-medium text-sm text-[#111827]">{formatearPrecio(subtotal)}</Text>
                                     </View>
                                     <View className="mb-3 flex-row justify-between">
                                         <Text className="text-sm text-[#6b7280]">Envío</Text>
                                         <Text className="font-roboto-medium text-sm text-[#111827]">
-                                            {cartItems.length > 0 ? formatearPrecio(costoEnvio) : "$0"}
+                                            {selectedItems.length > 0 ? formatearPrecio(costoEnvio) : "$0"}
                                         </Text>
                                     </View>
                                     <View className="my-4 flex-row justify-between border-t border-[#eef1f5] pt-4">
@@ -224,10 +292,11 @@ const CheckoutWeb = () => {
                                         <Text className="font-roboto-bold text-xl text-[#FF9E00]">{formatearPrecio(total)}</Text>
                                     </View>
                                     <CustomButton
-                                        className="mt-4 w-full justify-center items-center rounded-xl bg-primary py-4 shadow-sm"
+                                        className={`mt-4 w-full justify-center items-center rounded-xl bg-primary py-4 shadow-sm ${isProcessing ? 'opacity-50' : ''}`}
                                         onPress={handlePagar}
+                                        disabled={isProcessing}
                                     >
-                                        PAGAR PEDIDO
+                                        {isProcessing ? "PROCESANDO..." : "PAGAR PEDIDO"}
                                     </CustomButton>
                                 </View>
                             </View>
