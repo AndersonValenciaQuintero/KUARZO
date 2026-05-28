@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { router, usePathname } from 'expo-router';
+import React from 'react';
 import { Pressable, View } from 'react-native';
 
 interface BarrNavegProps {
@@ -8,17 +8,23 @@ interface BarrNavegProps {
     platform?: 'web' | 'movil';
 }
 
-type TabId = 'home' | 'catalog' | 'cart' | 'profile';
+type TabId = 'catalog' | 'cart' | 'profile';
 
 const tabs: { id: TabId; icon: string; route: string }[] = [
-    { id: 'home',    icon: 'home',   route: '/'         },
-    { id: 'catalog', icon: 'apps',   route: '/catalogo' },
-    { id: 'cart',    icon: 'cart',   route: '/cart'     },
-    { id: 'profile', icon: 'person', route: '/login'    },
+    { id: 'catalog', icon: 'apps', route: '/catalogo' },
+    { id: 'cart', icon: 'cart', route: '/cart' },
+    { id: 'profile', icon: 'person', route: '/login' },
 ];
 
 const BarrNaveg = ({ platform = 'movil' }: BarrNavegProps) => {
-    const [activeTab, setActiveTab] = useState<TabId>('home');
+    const pathname = usePathname();
+
+    let activeTab: TabId = 'catalog';
+    if (pathname === '/cart') {
+        activeTab = 'cart';
+    } else if (pathname === '/login' || pathname === '/register') {
+        activeTab = 'profile';
+    }
 
     return (
         <View
@@ -40,7 +46,6 @@ const BarrNaveg = ({ platform = 'movil' }: BarrNavegProps) => {
                     <Pressable
                         key={tab.id}
                         onPress={() => {
-                            setActiveTab(tab.id);
                             router.push(tab.route as any);
                         }}
                         className={`p-3 rounded-full ${isActive ? 'bg-orange-100' : 'bg-transparent'}`}

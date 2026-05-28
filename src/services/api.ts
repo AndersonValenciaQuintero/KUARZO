@@ -1,16 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 /**
  * URL base de tu backend Express.
- * - En simuladores de Android, 'localhost' no funciona, se debe usar '10.0.2.2'.
- * - En iOS o Web, funciona con 'localhost'.
- * - Si pruebas en un dispositivo físico, debes cambiarlo por la IP local de tu PC (ej: 'http://192.168.1.50:3000/api').
+ * - Detecta automáticamente si está en web (localhost).
+ * - En celular físico o simuladores, obtiene la IP local de la computadora de desarrollo de forma automática.
  */
 const getBaseUrl = (): string => {
-  // En dispositivo físico Android usa la IP local (ej: http://192.168.1.8:3000/api)
-  // En iOS/Web usa localhost
-  return 'http://localhost:3000/api';
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3000/api';
+  }
+
+  const hostUri = Constants.expoConfig?.hostUri;
+  const ip = hostUri ? hostUri.split(':')[0] : 'localhost';
+  return `http://${ip}:3000/api`;
 };
 
 const api = axios.create({

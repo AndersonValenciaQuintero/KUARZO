@@ -130,6 +130,21 @@ const LoginWeb: React.FC = () => {
                         </View>
                     </View>
 
+                    {/* Olvidaste tu contraseña */}
+                    <Pressable
+                        onPress={() => router.push('/recover')}
+                        disabled={isLoading}
+                        style={{ alignSelf: 'flex-end', marginTop: 8 }}
+                    >
+                        <Text style={{
+                            fontSize: 13,
+                            color: '#f97316',
+                            margin: 10
+                        }}>
+                            ¿Olvidaste tu contraseña?
+                        </Text>
+                    </Pressable>
+
                     <CustomButton
                         className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
                         onPress={handleLogin}
@@ -138,14 +153,19 @@ const LoginWeb: React.FC = () => {
                         {isLoading ? 'CARGANDO...' : 'INICIAR SESIÓN'}
                     </CustomButton>
 
-                    <CustomButton
+                    <Pressable
                         onPress={() => router.push('/register')}
-                        variant="text-only"
-                        color="secondary"
                         disabled={isLoading}
+                        style={{ alignItems: 'center', marginTop: 20 }}
                     >
-                        ¿No tienes cuenta? Regístrate
-                    </CustomButton>
+                        <Text style={{
+                            fontFamily: 'OpenSans-Regular',
+                            fontSize: 14,
+                            color: '#f97316',
+                        }}>
+                            ¿No tienes cuenta? <Text style={{ fontFamily: 'Roboto-Bold' }}>Regístrate</Text>
+                        </Text>
+                    </Pressable>
                 </View>
             </View>
         </ScrollView >

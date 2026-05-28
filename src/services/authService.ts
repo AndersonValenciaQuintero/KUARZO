@@ -44,4 +44,20 @@ export const authService = {
     const response = await api.post<{ message: string; userId: number }>('/auth/register', credentials);
     return response.data;
   },
+
+  /**
+   * Solicita el restablecimiento de contraseña para un correo dado.
+   */
+  forgotPassword: async (correo: string): Promise<{ message: string; testUrl?: string }> => {
+    const response = await api.post<{ message: string; testUrl?: string }>('/auth/forgot-password', { correo });
+    return response.data;
+  },
+
+  /**
+   * Envía la nueva contraseña para restablecerla con el token correspondiente.
+   */
+  resetPassword: async (token: string, contrasena: string): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/reset-password', { token, contrasena });
+    return response.data;
+  },
 };

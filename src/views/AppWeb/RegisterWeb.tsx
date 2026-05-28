@@ -219,7 +219,7 @@ const RegisterScreen: React.FC = () => {
                     </View>
 
                     {/* Validación */}
-                    <View style={styles.requirementRow}>
+                    <View style={styles.requirementRow} className='mb-2'>
                         <View style={[
                             styles.circle,
                             password.length >= 8 && { backgroundColor: '#4CAF50', borderColor: '#4CAF50' }
@@ -235,14 +235,19 @@ const RegisterScreen: React.FC = () => {
                     >
                         {isLoading ? 'CARGANDO...' : 'CREA TU CUENTA'}
                     </CustomButton>
-                    <CustomButton
+                    <Pressable
                         onPress={() => router.push('/login')}
-                        variant="text-only"
-                        color="secondary"
                         disabled={isLoading}
+                        style={{ alignItems: 'center', marginTop: 20 }}
                     >
-                        ¿Ya tienes cuenta? Inicia sesión
-                    </CustomButton>
+                        <Text style={{
+                            fontFamily: 'OpenSans-Regular',
+                            fontSize: 14,
+                            color: '#f97316',
+                        }}>
+                            ¿Ya tienes cuenta? <Text style={{ fontFamily: 'Roboto-Bold' }}>Inicia sesión</Text>
+                        </Text>
+                    </Pressable>
 
                 </View>
             </View>
