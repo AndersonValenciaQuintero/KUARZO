@@ -1,6 +1,6 @@
-import AppHeader from '@/components/AppHeader';
-import CustomButton from '@/components/CustomButton';
-import { MaterialIcons } from "@expo/vector-icons";
+import { useCartStore } from '@/src/store/useCartStore';
+import { MaterialIcons } from '@expo/vector-icons';
+import BarrNaveg from '@/components/BarrNaveg';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -11,7 +11,6 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCartStore } from '@/src/store/useCartStore';
 
 const DetalleProdMovil = () => {
     const { addItem } = useCartStore();
@@ -20,10 +19,28 @@ const DetalleProdMovil = () => {
     const { id, nombre, descripcion, precio, imagen, categoria } = params;
 
     const productNombre = nombre ? String(nombre) : 'Pulsera volcanica';
-    const productDescripcion = descripcion ? String(descripcion) : 'Pulseras realizadas en piedra volcanica natural.';
+    const productDescripcion = descripcion
+        ? String(descripcion)
+        : 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.';
     const productPrecio = precio ? Number(precio) : 45000;
-    const mainImage = imagen ? String(imagen) : 'https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=80';
+
+    // Resolve image source (handle local require numbers and remote URIs)
+    const mainImage = useMemo(() => {
+        if (!imagen) return 'https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=80';
+        const num = Number(imagen);
+        return isNaN(num) ? String(imagen) : num;
+    }, [imagen]);
+
     const productCategoria = categoria ? String(categoria) : 'Pulsera';
+
+    // Helper for image source
+    const getImageSource = (img: any) => {
+        if (!img) return { uri: 'https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=80' };
+        if (typeof img === 'number') return img;
+        const num = Number(img);
+        if (!isNaN(num) && String(img).trim() !== "") return num;
+        return { uri: String(img) };
+    };
 
     const localProductImages = useMemo(() => [
         mainImage,
@@ -46,119 +63,260 @@ const DetalleProdMovil = () => {
     const [quantity, setQuantity] = useState(1);
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
-            <ScrollView className="flex-1 bg-white" showsVerticalScrollIndicator={false}>
-                <AppHeader platform="movil" />
-
-                <View className="px-5 pt-4 bg-white w-full">
-                    <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+            <ScrollView
+                style={{ flex: 1, backgroundColor: '#fff' }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 100 }}
+            >
+                {/* Header con botón Volver */}
+                <View style={{
+                    paddingHorizontal: 20,
+                    paddingTop: 16,
+                    paddingBottom: 12,
+                    backgroundColor: '#fff',
+                }}>
+                    <Pressable
+                        onPress={() => router.back()}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start' }}
+                    >
                         <MaterialIcons name="arrow-back" size={20} color="#111827" />
-                        <Text className="font-roboto-bold text-sm text-[#111827]">Volver</Text>
+                        <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 14, color: '#111827' }}>
+                            Volver
+                        </Text>
                     </Pressable>
                 </View>
 
-                <View className="items-center">
-                    <View className="w-full flex-col gap-10 px-5 py-8">
-                        {/* Arriba */}
-                        <View className="w-full">
-                            <View className="border border-[#9ca3af] bg-transparent p-4">
-                                <Image source={{ uri: selectedImage }} className="h-[320px] w-full" resizeMode="contain" />
-                            </View>
+                {/* Imagen principal */}
+                <View style={{ paddingHorizontal: 20 }}>
+                    <View style={{
+                        borderWidth: 1,
+                        borderColor: '#e5e7eb',
+                        borderRadius: 12,
+                        backgroundColor: '#fff',
+                        padding: 16,
+                        overflow: 'hidden',
+                    }}>
+                        <Image
+                            source={getImageSource(selectedImage)}
+                            style={{ height: 300, width: '100%' }}
+                            resizeMode="contain"
+                        />
+                    </View>
 
-                            <View className="mt-2 flex-row gap-2">
-                                {localProductImages.map((image, index) => {
-                                    const active = image === selectedImage;
-                                    return (
-                                        <Pressable
-                                            key={`${image}-${index}`}
-                                            onPress={() => setSelectedImage(image)}
-                                            className={`flex-1 border p-2 ${active ? 'border-secondary' : 'border-[#9ca3af]'}`}
-                                        >
-                                            <Image source={{ uri: image }} className="h-20 w-full" resizeMode="contain" />
-                                        </Pressable>
-                                    );
-                                })}
-                            </View>
-                        </View>
+                    {/* Miniaturas */}
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                        {localProductImages.map((image, index) => {
+                            const active = image === selectedImage;
+                            return (
+                                <Pressable
+                                    key={`${image}-${index}`}
+                                    onPress={() => setSelectedImage(image)}
+                                    style={{
+                                        flex: 1,
+                                        borderWidth: active ? 2 : 1,
+                                        borderColor: active ? '#FFD700' : '#e5e7eb',
+                                        borderRadius: 8,
+                                        padding: 6,
+                                        backgroundColor: '#fff',
+                                    }}
+                                >
+                                    <Image
+                                        source={getImageSource(image)}
+                                        style={{ height: 80, width: '100%' }}
+                                        resizeMode="contain"
+                                    />
+                                </Pressable>
+                            );
+                        })}
+                    </View>
+                </View>
 
-                        {/* Abajo */}
-                        <View className="w-full">
-                            <Text className="font-roboto-bold text-3xl text-tertiary" numberOfLines={2}>{productNombre}</Text>
-                            <Text className="mt-2 font-opensans-light text-sm leading-6 text-[#000000]">
-                                {productDescripcion}
+                {/* Info del producto */}
+                <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
+                    {/* Nombre */}
+                    <Text style={{
+                        fontFamily: 'Roboto-Bold',
+                        fontSize: 28,
+                        color: '#111827',
+                        lineHeight: 34,
+                    }} numberOfLines={2}>
+                        {productNombre}
+                    </Text>
+
+                    {/* Descripción */}
+                    <Text style={{
+                        fontFamily: 'OpenSans-Regular',
+                        fontSize: 14,
+                        color: '#6b7280',
+                        lineHeight: 22,
+                        marginTop: 10,
+                    }}>
+                        {productDescripcion}
+                    </Text>
+
+                    {/* Precio + disponibles */}
+                    <View style={{
+                        flexDirection: 'row',
+                        alignSelf: 'flex-start',
+                        borderWidth: 1,
+                        borderColor: '#e5e7eb',
+                        borderRadius: 8,
+                        marginTop: 20,
+                        overflow: 'hidden',
+                    }}>
+                        <View style={{
+                            backgroundColor: '#fff',
+                            paddingHorizontal: 20,
+                            paddingVertical: 12,
+                            justifyContent: 'center',
+                        }}>
+                            <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 26, color: '#FF9309' }}>
+                                ${new Intl.NumberFormat("es-CO").format(productPrecio)}
                             </Text>
+                        </View>
+                        <View style={{
+                            justifyContent: 'center',
+                            borderLeftWidth: 1,
+                            borderColor: '#e5e7eb',
+                            paddingHorizontal: 16,
+                        }}>
+                            <Text style={{ fontFamily: 'OpenSans-Regular', fontSize: 13, color: '#111827', lineHeight: 18 }}>
+                                20 und{'\n'}disponibles
+                            </Text>
+                        </View>
+                    </View>
 
-                            <View className="mt-6 flex-row items-stretch border border-[#9ca3af] self-start">
-                                <View className="justify-center px-4 py-3">
-                                    <Text className="font-roboto-bold text-3xl text-secondary">${new Intl.NumberFormat("es-CO").format(productPrecio)}</Text>
-                                </View>
-                                <View className="justify-center border-l border-[#9ca3af] px-3">
-                                    <Text className="font-opensans-regular text-xs text-[#000000]">20 und{'\n'}disponibles</Text>
-                                </View>
-                            </View>
+                    {/* Divider */}
+                    <View style={{ borderTopWidth: 1, borderColor: '#f3f4f6', marginTop: 20 }} />
 
-                            <View className="mt-6 border-t border-[#9ca3af] pt-4">
-                                <Text className="font-roboto-medium text-lg text-tertiary">Categoria:</Text>
-                                <Text className="mt-1 font-opensans-regular text-sm text-[#000000]">{productCategoria || 'General'}</Text>
-                            </View>
+                    {/* Categoría */}
+                    <View style={{ marginTop: 16 }}>
+                        <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 16, color: '#111827' }}>Categoría:</Text>
+                        <Text style={{ fontFamily: 'OpenSans-Regular', fontSize: 14, color: '#6b7280', marginTop: 4 }}>
+                            {productCategoria || 'General'}
+                        </Text>
+                    </View>
 
-                            <View className="mt-5 border-t border-[#9ca3af] pt-4">
-                                <Text className="font-roboto-medium text-lg text-tertiary">Color:</Text>
-                                <View className="mt-2 flex-row gap-2">
-                                    {localColorOptions.map((option) => {
-                                        const active = option.id === selectedColor;
-                                        return (
-                                            <Pressable
-                                                key={option.id}
-                                                onPress={() => {
-                                                    setSelectedColor(option.id);
-                                                    setSelectedImage(option.image);
-                                                }}
-                                                className={`h-14 w-14 items-center justify-center border bg-white p-1 ${active ? 'border-secondary' : 'border-[#9ca3af]'}`}
-                                            >
-                                                <Image source={{ uri: option.image }} className="h-full w-full" resizeMode="contain" />
-                                            </Pressable>
-                                        );
-                                    })}
-                                </View>
-                            </View>
+                    {/* Divider */}
+                    <View style={{ borderTopWidth: 1, borderColor: '#f3f4f6', marginTop: 16 }} />
 
-                            <View className="mt-6 mb-10">
-                                <Text className="font-roboto-medium text-lg text-tertiary">Cantidad</Text>
-                                <View className="mt-3 flex-col gap-4">
-                                    <View className="flex-row self-start border border-[#9ca3af]">
-                                        <Pressable className="px-4 py-2" onPress={() => setQuantity((current) => Math.max(1, current - 1))}>
-                                            <Text className="font-roboto-medium text-xl text-[#000000]">-</Text>
-                                        </Pressable>
-                                        <View className="justify-center px-3">
-                                            <Text className="font-opensans-regular text-lg text-[#000000]">{quantity}</Text>
-                                        </View>
-                                        <Pressable className="px-4 py-2" onPress={() => setQuantity((current) => current + 1)}>
-                                            <Text className="font-roboto-medium text-xl text-[#000000]">+</Text>
-                                        </Pressable>
-                                    </View>
+                    {/* Material */}
+                    <View style={{ marginTop: 16 }}>
+                        <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 16, color: '#111827' }}>Material:</Text>
+                        <Text style={{ fontFamily: 'OpenSans-Regular', fontSize: 14, color: '#6b7280', marginTop: 4 }}>
+                            Roca volcánica
+                        </Text>
+                    </View>
 
-                                    <CustomButton
-                                        color="primary"
-                                        className="w-full rounded-md px-6 py-4 font-roboto-bold text-base items-center justify-center"
+                    {/* Divider */}
+                    <View style={{ borderTopWidth: 1, borderColor: '#f3f4f6', marginTop: 16 }} />
+
+                    {/* Color */}
+                    <View style={{ marginTop: 16 }}>
+                        <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 16, color: '#111827' }}>Color:</Text>
+                        <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                            {localColorOptions.map((option) => {
+                                const active = option.id === selectedColor;
+                                return (
+                                    <Pressable
+                                        key={option.id}
                                         onPress={() => {
-                                            addItem({
-                                                id: id ? String(id) : productNombre,
-                                                nombre: productNombre,
-                                                precio: productPrecio,
-                                                imagen: selectedImage,
-                                                cantidad: quantity
-                                            });
+                                            setSelectedColor(option.id);
+                                            setSelectedImage(option.image);
+                                        }}
+                                        style={{
+                                            width: 56,
+                                            height: 56,
+                                            borderWidth: active ? 2 : 1,
+                                            borderColor: active ? '#FFD700' : '#e5e7eb',
+                                            borderRadius: 8,
+                                            backgroundColor: '#fff',
+                                            padding: 3,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                         }}
                                     >
-                                        AGREGAR AL CARRITO
-                                    </CustomButton>
-                                </View>
-                            </View>
+                                        <Image
+                                            source={getImageSource(option.image)}
+                                            style={{ height: '100%', width: '100%' }}
+                                            resizeMode="contain"
+                                        />
+                                    </Pressable>
+                                );
+                            })}
                         </View>
+                    </View>
+
+                    {/* Cantidad + Botón */}
+                    <View style={{ marginTop: 24, marginBottom: 20 }}>
+                        <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 16, color: '#111827', marginBottom: 12 }}>
+                            Cantidad
+                        </Text>
+
+                        {/* Selector de cantidad */}
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            borderWidth: 1,
+                            borderColor: '#e5e7eb',
+                            borderRadius: 8,
+                            alignSelf: 'flex-start',
+                            overflow: 'hidden',
+                        }}>
+                            <Pressable
+                                style={{ paddingHorizontal: 16, paddingVertical: 12 }}
+                                onPress={() => setQuantity((c) => Math.max(1, c - 1))}
+                            >
+                                <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 18, color: '#111827' }}>−</Text>
+                            </Pressable>
+                            <View style={{
+                                paddingHorizontal: 20,
+                                justifyContent: 'center',
+                                borderLeftWidth: 1,
+                                borderRightWidth: 1,
+                                borderColor: '#e5e7eb',
+                            }}>
+                                <Text style={{ fontFamily: 'OpenSans-Regular', fontSize: 18, color: '#111827' }}>
+                                    {quantity}
+                                </Text>
+                            </View>
+                            <Pressable
+                                style={{ paddingHorizontal: 16, paddingVertical: 12 }}
+                                onPress={() => setQuantity((c) => c + 1)}
+                            >
+                                <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 18, color: '#111827' }}>+</Text>
+                            </Pressable>
+                        </View>
+
+                        {/* Botón AGREGAR AL CARRITO */}
+                        <Pressable
+                            style={{
+                                backgroundColor: '#FFD700',
+                                paddingVertical: 16,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 8,
+                                marginTop: 20,
+                            }}
+                            onPress={() => {
+                                addItem({
+                                    id: id ? String(id) : productNombre,
+                                    nombre: productNombre,
+                                    precio: productPrecio,
+                                    imagen: selectedImage,
+                                    cantidad: quantity,
+                                });
+                            }}
+                        >
+                            <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 15, color: '#111827', letterSpacing: 1 }}>
+                                AGREGAR AL CARRITO
+                            </Text>
+                        </Pressable>
                     </View>
                 </View>
             </ScrollView>
+            <BarrNaveg />
         </SafeAreaView>
     );
 };

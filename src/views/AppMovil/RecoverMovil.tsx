@@ -1,62 +1,66 @@
-import BarrNaveg from '@/components/BarrNaveg';
 import { authService } from '@/src/services/authService';
-import { useAuthStore } from '@/src/store/useAuthStore';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
+    Linking,
     Platform,
     Pressable,
     ScrollView,
     Text,
     TextInput,
-    TouchableOpacity,
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const LoginMovil: React.FC = () => {
-
+const RecoverMovil: React.FC = () => {
     const [correo, setCorreo] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const loginStore = useAuthStore((state: any) => state.login);
-
-    const handleLogin = async (): Promise<void> => {
-        if (!correo || !password) {
-            Alert.alert('Error', 'Completa todos los campos');
+    const handleRecover = async (): Promise<void> => {
+        if (!correo) {
+            Alert.alert('Error', 'Ingresa tu correo electrónico');
             return;
         }
 
         setIsLoading(true);
         try {
-            const response = await authService.login({
-                correo,
-                contrasena: password,
-            });
+            const response = await authService.forgotPassword(correo);
 
-            await AsyncStorage.setItem('user_token', response.token);
-
-            loginStore({
-                id: response.usuario.id,
-                primerNombre: response.usuario.primerNombre,
-                primerApellido: response.usuario.primerApellido,
-                correo: response.usuario.correo,
-                rol: response.usuario.rol,
-            });
-
-            Alert.alert('Éxito', response.message);
-            router.replace('/catalogo'); // Redirigir al catálogo
+            if (response.testUrl) {
+                Alert.alert(
+                    '📧 Correo Enviado (Pruebas)',
+                    'Se generó un correo de pruebas. ¿Deseas abrir la bandeja de entrada temporal para ver el correo?',
+                    [
+                        {
+                            text: 'Cerrar',
+                            onPress: () => router.replace('/login'),
+                        },
+                        {
+                            text: 'Ver Correo',
+                            onPress: () => {
+                                Linking.openURL(response.testUrl!).catch((err) => {
+                                    console.error('Error al abrir Ethereal Mail:', err);
+                                });
+                                router.replace('/login');
+                            },
+                        },
+                    ]
+                );
+            } else {
+                Alert.alert(
+                    'Éxito',
+                    'Se ha enviado un correo con instrucciones para restablecer tu contraseña.',
+                    [{ text: 'Aceptar', onPress: () => router.replace('/login') }]
+                );
+            }
         } catch (error: any) {
-            console.error('Error en LoginMovil:', error);
-            const errorMsg = error.response?.data?.error || 'Credenciales incorrectas o error de conexión';
-            Alert.alert('Error de Inicio de Sesión', errorMsg);
+            console.error('Error en RecoverMovil:', error);
+            const errorMsg = error.response?.data?.error || 'No se pudo procesar la solicitud o el correo no existe';
+            Alert.alert('Error', errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -74,7 +78,6 @@ const LoginMovil: React.FC = () => {
                         justifyContent: 'center',
                         alignItems: 'center',
                         padding: 24,
-                        paddingBottom: 100,
                     }}
                     showsVerticalScrollIndicator={false}
                 >
@@ -124,7 +127,7 @@ const LoginMovil: React.FC = () => {
                             color: '#111827',
                             marginBottom: 6,
                         }}>
-                            Inicia Sesión
+                            Recuperar Contraseña
                         </Text>
                         <Text style={{
                             fontFamily: 'OpenSans-Regular',
@@ -132,11 +135,11 @@ const LoginMovil: React.FC = () => {
                             color: '#9ca3af',
                             marginBottom: 20,
                         }}>
-                            Accede a tu cuenta Kuarzo
+                            Ingresa tu correo para recibir un enlace de recuperación
                         </Text>
 
                         {/* Correo */}
-                        <View style={{ marginBottom: 16 }}>
+                        <View style={{ marginBottom: 16 }} className='mb-2'>
                             <Text style={{
                                 fontFamily: 'Roboto-Medium',
                                 fontSize: 13,
@@ -166,108 +169,33 @@ const LoginMovil: React.FC = () => {
                             />
                         </View>
 
-                        {/* Contraseña */}
-                        <View style={{ marginBottom: 8 }}>
-                            <Text style={{
-                                fontFamily: 'Roboto-Medium',
-                                fontSize: 13,
-                                color: '#4b5563',
-                                marginBottom: 6,
-                            }}>
-                                Contraseña
-                            </Text>
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                borderWidth: 1,
-                                borderColor: '#e5e7eb',
-                                borderRadius: 10,
-                                paddingHorizontal: 14,
-                                backgroundColor: '#fafbfc',
-                            }}>
-                                <TextInput
-                                    placeholder="Ingresa tu contraseña"
-                                    placeholderTextColor="#bbb"
-                                    style={{
-                                        flex: 1,
-                                        paddingVertical: 14,
-                                        fontSize: 16,
-                                        fontFamily: 'OpenSans-Regular',
-                                        color: '#111827',
-                                    }}
-                                    secureTextEntry={!showPassword}
-                                    onChangeText={setPassword}
-                                    value={password}
-                                    editable={!isLoading}
-                                />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
-                                    <Ionicons
-                                        name={showPassword ? "eye-outline" : "eye-off-outline"}
-                                        size={22}
-                                        color="#9ca3af"
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        {/* Olvidaste tu contraseña */}
-                        <Pressable
-                            onPress={() => router.push('/recover')}
-                            disabled={isLoading}
-                            style={{ alignSelf: 'flex-end', marginTop: 8 }}
-                        >
-                            <Text style={{
-                                fontFamily: 'OpenSans-Regular',
-                                fontSize: 13,
-                                color: '#f97316',
-                            }}>
-                                ¿Olvidaste tu contraseña?
-                            </Text>
-                        </Pressable>
-
-                        {/* Botón Login */}
+                        {/* Botón Enviar */}
                         <Pressable
                             style={{
-                                backgroundColor: isLoading ? '#e5e7eb' : '#FFD700',
+                                backgroundColor: isLoading ? '#e5e7eb' : '#f97316',
                                 paddingVertical: 16,
                                 borderRadius: 10,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                marginTop: 24,
+                                marginTop: 12,
                             }}
-                            onPress={handleLogin}
+                            onPress={handleRecover}
                             disabled={isLoading}
                         >
                             <Text style={{
                                 fontFamily: 'Roboto-Bold',
                                 fontSize: 15,
-                                color: isLoading ? '#9ca3af' : '#111827',
+                                color: isLoading ? '#9ca3af' : '#ffffff',
                                 letterSpacing: 1,
                             }}>
-                                {isLoading ? 'CARGANDO...' : 'INICIAR SESIÓN'}
-                            </Text>
-                        </Pressable>
-
-                        {/* Link a registro */}
-                        <Pressable
-                            onPress={() => router.push('/register')}
-                            disabled={isLoading}
-                            style={{ alignItems: 'center', marginTop: 20 }}
-                        >
-                            <Text style={{
-                                fontFamily: 'OpenSans-Regular',
-                                fontSize: 14,
-                                color: '#f97316',
-                            }}>
-                                ¿No tienes cuenta? <Text style={{ fontFamily: 'Roboto-Bold' }}>Regístrate</Text>
+                                {isLoading ? 'CARGANDO...' : 'ENVIAR CORREO'}
                             </Text>
                         </Pressable>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-            <BarrNaveg />
         </SafeAreaView>
     );
 };
 
-export default LoginMovil;
+export default RecoverMovil;

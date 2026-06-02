@@ -1,17 +1,18 @@
 import CustomButton from '@/components/CustomButton';
-import { Ionicons } from '@expo/vector-icons';
+import { authService } from '@/src/services/authService';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
-    useWindowDimensions,
+    useWindowDimensions
 } from 'react-native';
 
 const RegisterScreen: React.FC = () => {
@@ -24,6 +25,7 @@ const RegisterScreen: React.FC = () => {
     const [telefono, setTelefono] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showPassword2, setShowPassword2] = useState<boolean>(false);
@@ -31,29 +33,60 @@ const RegisterScreen: React.FC = () => {
     const { width: windowWidth } = useWindowDimensions();
     const isSmallScreen = windowWidth < 900;
 
-    const handleRegister = (): void => {
+    const handleRegister = async (): Promise<void> => {
         if (!primerNombre || !primerApellido || !correo || !password) {
-            Alert.alert('Error', 'Completa los campos obligatorios');
+            window.alert('Completa los campos obligatorios');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Las contraseñas no coinciden');
+            window.alert('Las contraseñas no coinciden');
             return;
         }
 
         if (password.length < 8) {
-            Alert.alert('Error', 'La contraseña debe tener mínimo 8 caracteres');
+            window.alert('La contraseña debe tener mínimo 8 caracteres');
             return;
         }
 
-        Alert.alert('Éxito', 'Usuario registrado correctamente');
+        setIsLoading(true);
+        try {
+            const response = await authService.register({
+                primerNombre,
+                segundoNombre: segundoNombre || undefined,
+                primerApellido,
+                segundoApellido: segundoApellido || undefined,
+                correo,
+                contrasena: password,
+                telefono: telefono || undefined,
+                rolId: 1, // Por defecto rol de COMPRADOR
+            });
+
+            window.alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+            router.push('/login'); // Redirigir al inicio de sesión
+        } catch (error: any) {
+            console.error('Error en RegisterWeb:', error);
+            const errorMsg = error.response?.data?.error || 'No se pudo completar el registro';
+            window.alert(errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-            <View 
-                style={{ 
+
+            <View className="px-5 pt-6 bg-white w-full">
+                <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
+                    <MaterialIcons name="arrow-back" size={20} color="#111827" />
+                    <Text className="font-roboto-bold text-sm text-[#111827]">
+                        Volver
+                    </Text>
+                </Pressable>
+            </View>
+
+            <View
+                style={{
                     flexDirection: isSmallScreen ? 'column' : 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -186,7 +219,7 @@ const RegisterScreen: React.FC = () => {
                     </View>
 
                     {/* Validación */}
-                    <View style={styles.requirementRow}>
+                    <View style={styles.requirementRow} className='mb-2'>
                         <View style={[
                             styles.circle,
                             password.length >= 8 && { backgroundColor: '#4CAF50', borderColor: '#4CAF50' }
@@ -196,17 +229,25 @@ const RegisterScreen: React.FC = () => {
 
                     {/* Botón */}
                     <CustomButton
-                        children='CREA TU CUENTA'
                         className='bg-primary rounded-md font-roboto-bold w-full h-12 mt-6 justify-center items-center'
                         onPress={handleRegister}
-                    />
-                    <CustomButton
-                        onPress={() => router.push('/login')}
-                        variant="text-only"
-                        color="secondary"
+                        disabled={isLoading}
                     >
-                        ¿Ya tienes cuenta? Inicia sesión
+                        {isLoading ? 'CARGANDO...' : 'CREA TU CUENTA'}
                     </CustomButton>
+                    <Pressable
+                        onPress={() => router.push('/login')}
+                        disabled={isLoading}
+                        style={{ alignItems: 'center', marginTop: 20 }}
+                    >
+                        <Text style={{
+                            fontFamily: 'OpenSans-Regular',
+                            fontSize: 14,
+                            color: '#f97316',
+                        }}>
+                            ¿Ya tienes cuenta? <Text style={{ fontFamily: 'Roboto-Bold' }}>Inicia sesión</Text>
+                        </Text>
+                    </Pressable>
 
                 </View>
             </View>

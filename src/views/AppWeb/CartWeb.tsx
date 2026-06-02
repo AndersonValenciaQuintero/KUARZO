@@ -2,56 +2,41 @@ import AppHeader from '@/components/AppHeader';
 import { useCartStore } from '@/src/store/useCartStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CartWeb() {
-    const { items: cartItems, updateQuantity, removeItem } = useCartStore();
+    const { items: cartItems, updateQuantity, removeItem, toggleSelectItem, toggleAllItems } = useCartStore();
     const { width } = useWindowDimensions();
     const isSmallScreen = width < 900;
 
     const fmt = (price: number) => '$' + new Intl.NumberFormat('es-CO').format(price);
 
-    // Inicializar todos seleccionados al entrar o cuando cambia el carrito
-    const [selectedIds, setSelectedIds] = React.useState<Set<number | string>>(
-        new Set<number | string>(cartItems.map((i) => i.id))
-    );
-    useEffect(() => {
-        setSelectedIds(new Set<number | string>(cartItems.map((i) => i.id)));
-    }, [cartItems.length]);
-
-    const allSelected = cartItems.length > 0 && cartItems.every((i) => selectedIds.has(i.id));
+    const allSelected = cartItems.length > 0 && cartItems.every((i) => i.selected !== false);
 
     const toggleAll = () => {
-        if (allSelected) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set<number | string>(cartItems.map((i) => i.id)));
-        }
+        toggleAllItems(!allSelected);
     };
 
     const toggleItem = (id: number | string) => {
-        setSelectedIds((prev) => {
-            const next = new Set(prev);
-            next.has(id) ? next.delete(id) : next.add(id);
-            return next;
-        });
+        toggleSelectItem(id);
     };
 
     // Subtotal solo de los ítems seleccionados
     const selectedSubtotal = useMemo(() =>
         cartItems
-            .filter((i) => selectedIds.has(i.id))
+            .filter((i) => i.selected !== false)
             .reduce((acc, i) => acc + i.precio * i.cantidad, 0),
-        [cartItems, selectedIds]
+        [cartItems]
     );
     const selectedCount = useMemo(() =>
         cartItems
-            .filter((i) => selectedIds.has(i.id))
+            .filter((i) => i.selected !== false)
             .reduce((acc, i) => acc + i.cantidad, 0),
-        [cartItems, selectedIds]
+        [cartItems]
     );
+    const hasSelected = cartItems.some((i) => i.selected !== false);
 
     // Comprar: navegar a checkout
     const handleBuy = () => {
@@ -80,6 +65,13 @@ export default function CartWeb() {
                 {/* Contenido Principal */}
                 <View style={{ paddingHorizontal: isSmallScreen ? 20 : 80, paddingTop: 32, maxWidth: 1200, alignSelf: 'center', width: '100%' }}>
 
+                    <Pressable className="flex-row items-center gap-2 self-start" onPress={() => router.back()}>
+                        <MaterialIcons name="arrow-back" size={20} color="#111827" />
+                        <Text className="font-roboto-bold text-sm text-[#111827]">
+                            Volver
+                        </Text>
+                    </Pressable>
+
                     {/* Título */}
                     <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 26, color: '#000', marginBottom: 24 }}>
                         Carrito de compra
@@ -99,6 +91,7 @@ export default function CartWeb() {
                                     name={allSelected ? 'check-box' : 'check-box-outline-blank'}
                                     size={16}
                                     color={allSelected ? '#FFD700' : '#000'}
+                                    style={undefined}
                                 />
                                 <Text style={{ fontFamily: 'Roboto-Medium', fontSize: 14, color: '#000', marginLeft: 10 }}>
                                     Seleccionar todos los productos
@@ -130,14 +123,14 @@ export default function CartWeb() {
                                             {/* Checkbox */}
                                             <Pressable onPress={() => toggleItem(item.id)}>
                                                 <MaterialIcons
-                                                    name={selectedIds.has(item.id) ? 'check-box' : 'check-box-outline-blank'}
+                                                    name={item.selected !== false ? 'check-box' : 'check-box-outline-blank'}
                                                     size={16}
-                                                    color={selectedIds.has(item.id) ? '#FFD700' : '#000'}
+                                                    color={item.selected !== false ? '#FFD700' : '#000'}
                                                 />
                                             </Pressable>
 
                                             {/* Imagen */}
-                                            <Pressable 
+                                            <Pressable
                                                 onPress={() => goToDetail(item)}
                                                 style={{
                                                     width: 100,
@@ -153,7 +146,7 @@ export default function CartWeb() {
                                                 }}
                                             >
                                                 <Image
-                                                    source={{ uri: item.imagen }}
+                                                    source={typeof item.imagen === 'string' ? { uri: item.imagen } : item.imagen}
                                                     style={{ width: '100%', height: '100%' }}
                                                     resizeMode="contain"
                                                 />
@@ -254,7 +247,7 @@ export default function CartWeb() {
                             </Text>
 
                             {cartItems
-                                .filter((item) => selectedIds.has(item.id))
+                                .filter((item) => item.selected !== false)
                                 .map((item) => (
                                     <View key={item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                                         <Text style={{ fontFamily: 'OpenSans-Regular', fontSize: 14, color: '#6b7280', flex: 1 }} numberOfLines={1}>
@@ -278,16 +271,16 @@ export default function CartWeb() {
                             {/* Botón COMPRAR: solo compra los seleccionados */}
                             <Pressable
                                 style={{
-                                    backgroundColor: selectedIds.size > 0 ? '#FFD700' : '#e5e7eb',
+                                    backgroundColor: hasSelected ? '#FFD700' : '#e5e7eb',
                                     paddingVertical: 14,
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     marginTop: 16,
                                     borderRadius: 5,
                                 }}
-                                onPress={selectedIds.size > 0 ? handleBuy : undefined}
+                                onPress={hasSelected ? handleBuy : undefined}
                             >
-                                <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 13, color: selectedIds.size > 0 ? '#000' : '#9ca3af' }}>COMPRAR</Text>
+                                <Text style={{ fontFamily: 'Roboto-Bold', fontSize: 13, color: hasSelected ? '#000' : '#9ca3af' }}>COMPRAR</Text>
                             </Pressable>
                         </View>
                     </View>
